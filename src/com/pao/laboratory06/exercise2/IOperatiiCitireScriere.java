@@ -6,7 +6,5 @@ public interface IOperatiiCitireScriere {
     void citeste(Scanner in);
     void afiseaza();
     String tipContract();
-    default boolean areBonus() {
-        return false;
-    }
+    default boolean areBonus() { return false; }
 }

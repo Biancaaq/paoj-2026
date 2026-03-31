@@ -7,19 +7,18 @@ public class CIMColaborator extends PersoanaFizica {
 
     @Override
     public void citeste(Scanner in) {
-        this.nume = in.next();
-        this.prenume = in.next();
-        this.venitBrutLunar = in.nextDouble();
+        nume = in.next();
+        prenume = in.next();
+        venitBrutLunar = in.nextDouble();
         if (in.hasNext("DA") || in.hasNext("NU")) {
-            this.bonus = in.next().equals("DA");
+            bonus = in.next().equals("DA");
         }
     }
 
     @Override
     public double calculeazaVenitNetAnual() {
-        double net = venitBrutLunar * 12 * 0.55;
-        if (bonus) net *= 1.10;
-        return net;
+        double netAnual = venitBrutLunar * 12 * 0.55;
+        return bonus ? netAnual * 1.10 : netAnual;
     }
 
     @Override

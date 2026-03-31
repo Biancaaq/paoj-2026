@@ -7,10 +7,10 @@ public class SRLColaborator extends PersoanaJuridica {
 
     @Override
     public void citeste(Scanner in) {
-        this.nume = in.next();
-        this.prenume = in.next();
-        this.venitBrutLunar = in.nextDouble();
-        this.cheltuieli = in.nextDouble();
+        nume = in.next();
+        prenume = in.next();
+        venitBrutLunar = in.nextDouble();
+        cheltuieli = in.nextDouble();
     }
 
     @Override

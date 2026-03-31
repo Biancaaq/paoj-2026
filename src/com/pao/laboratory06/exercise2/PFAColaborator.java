@@ -4,14 +4,14 @@ import java.util.Scanner;
 
 public class PFAColaborator extends PersoanaFizica {
     private double cheltuieli;
-    private final double SALARIU_MINIM_BRUT = 4050.0;
+    private final double SAL_MINIM_ANUAL = 4050.0 * 12;
 
     @Override
     public void citeste(Scanner in) {
-        this.nume = in.next();
-        this.prenume = in.next();
-        this.venitBrutLunar = in.nextDouble();
-        this.cheltuieli = in.nextDouble();
+        nume = in.next();
+        prenume = in.next();
+        venitBrutLunar = in.nextDouble();
+        cheltuieli = in.nextDouble();
     }
 
     @Override
@@ -20,20 +20,13 @@ public class PFAColaborator extends PersoanaFizica {
         double impozit = 0.10 * venitNet;
 
         double cass;
-        if (venitNet < 6 * SALARIU_MINIM_BRUT) {
-            cass = 0.10 * (6 * SALARIU_MINIM_BRUT);
-        } else if (venitNet <= 72 * SALARIU_MINIM_BRUT) {
-            cass = 0.10 * venitNet;
-        } else {
-            cass = 0.10 * (72 * SALARIU_MINIM_BRUT);
-        }
+        if (venitNet < 0.5 * SAL_MINIM_ANUAL) cass = 0.10 * (0.5 * SAL_MINIM_ANUAL);
+        else if (venitNet <= 6 * SAL_MINIM_ANUAL) cass = 0.10 * venitNet;
+        else cass = 0.10 * (6 * SAL_MINIM_ANUAL);
 
         double cas = 0;
-        if (venitNet >= 12 * SALARIU_MINIM_BRUT && venitNet <= 24 * SALARIU_MINIM_BRUT) {
-            cas = 0.25 * (12 * SALARIU_MINIM_BRUT);
-        } else if (venitNet > 24 * SALARIU_MINIM_BRUT) {
-            cas = 0.25 * (24 * SALARIU_MINIM_BRUT);
-        }
+        if (venitNet >= SAL_MINIM_ANUAL && venitNet <= 2 * SAL_MINIM_ANUAL) cas = 0.25 * SAL_MINIM_ANUAL;
+        else if (venitNet > 2 * SAL_MINIM_ANUAL) cas = 0.25 * (2 * SAL_MINIM_ANUAL);
 
         return venitNet - impozit - cass - cas;
     }

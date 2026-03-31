@@ -1,8 +1,7 @@
 package com.pao.laboratory06.exercise2;
 
 public abstract class Colaborator implements IOperatiiCitireScriere {
-    protected String nume;
-    protected String prenume;
+    protected String nume, prenume;
     protected double venitBrutLunar;
 
     public abstract double calculeazaVenitNetAnual();

@@ -5,11 +5,11 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        if(!sc.hasNextInt()) return;
+        if (!sc.hasNextInt()) return;
         int n = sc.nextInt();
         List<Colaborator> lista = new ArrayList<>();
+
         for (int i = 0; i < n; i++) {
-            if (!sc.hasNext()) break;
             String tip = sc.next();
             Colaborator c = switch (tip) {
                 case "CIM" -> new CIMColaborator();
@@ -22,27 +22,32 @@ public class Main {
                 lista.add(c);
             }
         }
+
+        lista.sort((a, b) -> Double.compare(b.calculeazaVenitNetAnual(), a.calculeazaVenitNetAnual()));
         lista.forEach(Colaborator::afiseaza);
+
         System.out.print("\nColaborator cu venit net maxim: ");
         lista.stream()
                 .max(Comparator.comparingDouble(Colaborator::calculeazaVenitNetAnual))
                 .ifPresent(Colaborator::afiseaza);
+
         System.out.println("\nColaboratori persoane juridice:");
         lista.stream()
                 .filter(c -> c instanceof PersoanaJuridica)
                 .forEach(Colaborator::afiseaza);
+
         System.out.println("\nSume și număr colaboratori pe tip:");
-        for (TipColaborator t : TipColaborator.values()) {
+        for (String tip : List.of("CIM", "PFA", "SRL")) {
             double suma = 0;
             int count = 0;
-            for(Colaborator c : lista) {
-                if(c.tipContract().equals(t.name())) {
+            for (Colaborator c : lista) {
+                if (c.tipContract().equals(tip)) {
                     suma += c.calculeazaVenitNetAnual();
                     count++;
                 }
             }
             if (count > 0) {
-                System.out.printf("%s: suma = %.2f lei, număr = %d\n", t.name(), suma, count);
+                System.out.printf("%s: suma = %.2f lei, număr = %d\n", tip, suma, count);
             }
         }
     }
