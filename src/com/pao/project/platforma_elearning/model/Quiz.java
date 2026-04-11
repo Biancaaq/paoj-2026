@@ -12,4 +12,23 @@ public class Quiz {
         this.nrIntrebari = nrIntrebari;
         this.pragTrecere = pragTrecere;
     }
+
+    public int getId() { return id; }
+
+    public String getTitlu() { return titlu; }
+
+    public void setTitlu(String titlu) { this.titlu = titlu; }
+
+    public int getNrIntrebari() { return nrIntrebari; }
+
+    public void setNrIntrebari(int nrIntrebari) { this.nrIntrebari = nrIntrebari; }
+
+    public double getPragTrecere() { return pragTrecere; }
+
+    public void setPragTrecere(double pragTrecere) { this.pragTrecere = pragTrecere; }
+
+    @Override
+    public String toString() {
+        return "Quiz: titlu = " + titlu + ", numar intrebari = " + nrIntrebari +", prag de trecere = " + pragTrecere + "%";
+    }
 }

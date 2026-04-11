@@ -7,4 +7,17 @@ public class Cursant extends Utilizator {
         super(id, nume, email, parola);
         this.portofelVirtual = portofelVirtual;
     }
+
+    public double getPortofelVirtual() {
+        return portofelVirtual;
+    }
+
+    public void setPortofelVirtual(double portofelVirtual) {
+        this.portofelVirtual = portofelVirtual;
+    }
+
+    @Override
+    public String toString() {
+        return "Cursant: " + super.toString() + ", portofel = " + portofelVirtual;
+    }
 }

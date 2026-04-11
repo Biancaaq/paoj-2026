@@ -9,4 +9,25 @@ public class Instructor extends Staff {
         this.specializare = specializare;
         this.venituriIncasate = 0.0;
     }
+
+    public String getSpecializare() {
+        return specializare;
+    }
+
+    public void setSpecializare(String specializare) {
+        this.specializare = specializare;
+    }
+
+    public double getVenituriIncasate() {
+        return venituriIncasate;
+    }
+
+    public void setVenituriIncasate(double venituriIncasate) {
+        this.venituriIncasate = venituriIncasate;
+    }
+
+    @Override
+    public String toString() {
+        return "Instructor: " + super.toString() + ", specializare = " + specializare + ", venituri = " + venituriIncasate;
+    }
 }

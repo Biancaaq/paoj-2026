@@ -10,4 +10,19 @@ public class Recenzie {
         this.rating = rating;
         this.comentariu = comentariu;
     }
+
+    public int getIdCursant() { return idCursant; }
+
+    public int getRating() { return rating; }
+
+    public void setRating(int rating) { this.rating = rating; }
+
+    public String getComentariu() { return comentariu; }
+
+    public void setComentariu(String comentariu) { this.comentariu = comentariu; }
+
+    @Override
+    public String toString() {
+        return "Recenzie: rating = " + rating + "/5" + ", comentariu = " + comentariu;
+    }
 }

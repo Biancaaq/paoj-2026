@@ -7,4 +7,17 @@ public class Admin extends Staff {
         super(id, nume, email, parola, salariu);
         this.nivelAcces = nivelAcces;
     }
+
+    public int getNivelAcces() {
+        return nivelAcces;
+    }
+
+    public void setNivelAcces(int nivelAcces) {
+        this.nivelAcces = nivelAcces;
+    }
+
+    @Override
+    public String toString() {
+        return "Admin: " + super.toString() + ", nivelul de acces = " + nivelAcces;
+    }
 }
