@@ -17,6 +17,11 @@ public class Cursant extends Utilizator {
     }
 
     @Override
+    public String getTipUtilizator() {
+        return "CURSANT";
+    }
+
+    @Override
     public String toString() {
         return "Cursant: " + super.toString() + ", portofel = " + portofelVirtual;
     }

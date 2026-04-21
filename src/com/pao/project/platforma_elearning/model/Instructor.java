@@ -27,6 +27,11 @@ public class Instructor extends Staff {
     }
 
     @Override
+    public String getTipUtilizator() {
+        return "INSTRUCTOR";
+    }
+
+    @Override
     public String toString() {
         return "Instructor: " + super.toString() + ", specializare = " + specializare + ", venituri = " + venituriIncasate;
     }

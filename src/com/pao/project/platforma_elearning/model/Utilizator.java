@@ -43,6 +43,8 @@ public abstract class Utilizator {
         this.parola = parola;
     }
 
+    public abstract String getTipUtilizator();
+
     @Override
     public boolean equals(Object ob) {
         if (this == ob) {

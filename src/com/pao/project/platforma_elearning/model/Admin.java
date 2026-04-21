@@ -17,6 +17,11 @@ public class Admin extends Staff {
     }
 
     @Override
+    public String getTipUtilizator() {
+        return "ADMINISTRATOR";
+    }
+
+    @Override
     public String toString() {
         return "Admin: " + super.toString() + ", nivelul de acces = " + nivelAcces;
     }
