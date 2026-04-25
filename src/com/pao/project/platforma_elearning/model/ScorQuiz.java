@@ -15,15 +15,17 @@ public class ScorQuiz {
         this.dataSustinerii = LocalDateTime.now();
     }
 
-    public int getIdCursant() { return idCursant; }
+    public int getIdQuiz() {
+        return idQuiz;
+    }
 
-    public int getIdQuiz() { return idQuiz; }
+    public double getPunctaj() {
+        return punctaj;
+    }
 
-    public double getPunctaj() { return punctaj; }
-
-    public void setPunctaj(double punctaj) { this.punctaj = punctaj; }
-
-    public LocalDateTime getDataSustinerii() { return dataSustinerii; }
+    public int getIdCursant() {
+        return idCursant;
+    }
 
     @Override
     public String toString() {

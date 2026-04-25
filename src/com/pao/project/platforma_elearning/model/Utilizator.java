@@ -3,45 +3,21 @@ package com.pao.project.platforma_elearning.model;
 import java.util.Objects;
 
 public abstract class Utilizator {
+    private static int idCounter = 1;
     protected int id;
-    protected String nume;
-    protected String email;
-    protected String parola;
+    protected String nume, email, parola;
 
-    public Utilizator(int id, String nume, String email, String parola) {
-        this.id = id;
+    public Utilizator(String nume, String email, String parola) {
+        this.id = idCounter++;
         this.nume = nume;
         this.email = email;
         this.parola = parola;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getNume() {
-        return nume;
-    }
-
-    public void setNume(String nume) {
-        this.nume = nume;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getParola() {
-        return parola;
-    }
-
-    public void setParola(String parola) {
-        this.parola = parola;
-    }
+    public int getId() { return id; }
+    public String getNume() { return nume; }
+    public String getEmail() { return email; }
+    public String getParola() { return parola; }
 
     public abstract String getTipUtilizator();
 
@@ -51,19 +27,17 @@ public abstract class Utilizator {
             return true;
         }
 
-        if (!(ob instanceof  Utilizator)) {
+        if (!(ob instanceof Utilizator)) {
             return false;
         }
 
         Utilizator u = (Utilizator) ob;
 
-        return id == u.id && Objects.equals(email, u.email);
+        return Objects.equals(email, u.email);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id, email);
-    }
+    public int hashCode() { return Objects.hash(email); }
 
     @Override
     public String toString() {

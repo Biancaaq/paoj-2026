@@ -15,14 +15,6 @@ public final class Certificat {
         this.dataEmiterii = LocalDate.now();
     }
 
-    public String getCodUnic() { return codUnic; }
-
-    public String getNumeCursant() { return numeCursant; }
-
-    public String getNumeCurs() { return numeCurs; }
-
-    public LocalDate getDataEmiterii() { return dataEmiterii; }
-
     @Override
     public String toString() {
         return "Certificat: cod = " + codUnic + ", cursant = " + numeCursant + ", curs = " + numeCurs + ", data emiterii = " + dataEmiterii;

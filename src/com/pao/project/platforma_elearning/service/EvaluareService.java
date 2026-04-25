@@ -6,7 +6,9 @@ import com.pao.project.platforma_elearning.model.ScorQuiz;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class EvaluareService {
     private static EvaluareService instance;
@@ -28,9 +30,13 @@ public class EvaluareService {
         System.out.println("Inrolare inregistrata: " + i);
     }
 
-    public void salveazaScor(ScorQuiz s) {
-        scoruri.add(s);
-        System.out.println("Scor nou salvat: " + s.getPunctaj() + " puncte");
+    public boolean esteDejaInrolat(int idCursant, int idCurs) {
+        for (Inrolare i : inrolari) {
+            if (i.getIdCursant() == idCursant && i.getIdCurs() == idCurs) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Certificat genereazaCertificat(String numeCursant, String numeCurs, double progres) {
@@ -57,7 +63,60 @@ public class EvaluareService {
         return null;
     }
 
-    public void afiseazaToateInrolarile() {
-        inrolari.forEach(System.out::println);
+    public void salveazaScorQuiz(int idCursant, int idQuiz, double punctaj) {
+        ScorQuiz scor = new ScorQuiz(idCursant, idQuiz, punctaj);
+        this.scoruri.add(scor);
+        System.out.println("Scorul de " + punctaj + " a fost inregistrat in sistem");
+    }
+
+    public Map<Integer, List<ScorQuiz>> grupeazaScoruriPeCursanti() {
+        return scoruri.stream().collect(Collectors.groupingBy(ScorQuiz::getIdCursant));
+    }
+
+    public void afiseazaInrolariUtilizator(int idCursant) {
+        System.out.println("\nIstoric Inrolari si Certificate");
+        boolean gasit = false;
+
+        for (Inrolare inr : inrolari) {
+            if (inr.getIdCursant() == idCursant) {
+                System.out.println(inr);
+                gasit = true;
+
+                if (inr.getProgres() >= 100.0) {
+                    System.out.println("Curs finalizat! Poti cere generarea certificatului");
+                }
+            }
+        }
+
+        if (!gasit) {
+            System.out.println("Nu esti inrolat la niciun curs");
+        }
+    }
+
+    public boolean areQuizPromovat(int idCursant, int idQuiz) {
+        for (ScorQuiz s : scoruri) {
+            if (s.getIdCursant() == idCursant && s.getIdQuiz() == idQuiz && s.getPunctaj() >= 5.0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void stergeDateAsociateCursului(int idCurs, List<Integer> iduriQuiz) {
+        inrolari.removeIf(i -> i.getIdCurs() == idCurs);
+        scoruri.removeIf(s -> iduriQuiz.contains(s.getIdQuiz()));
+        System.out.println("Datele asociate cursului au fost sterse");
+    }
+
+    public void stergeInrolare(int idInrolare) {
+        boolean eliminat = inrolari.removeIf(i -> i.getIdInrolare() == idInrolare);
+
+        if (eliminat) {
+            System.out.println("Inrolarea cu ID-ul " + idInrolare + " a fost eliminata cu succes");
+        }
+
+        else {
+            System.out.println("Inrolarea cu ID-ul respectiv nu a fost gasita");
+        }
     }
 }

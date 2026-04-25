@@ -1,45 +1,49 @@
 package com.pao.project.platforma_elearning.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class Curs {
+public class Curs implements Comparable<Curs> {
+    private static int cursCounter = 1;
     private int id;
-    private String titlu;
-    private String categorie;
+    private String titlu, categorie;
     private double pret;
     private int idInstructor;
 
-    public Curs(int id, String titlu, String categorie, double pret, int idInstructor) {
-        this.id = id;
+    private List<Lectie> lectii;
+    private List<Quiz> quizuri;
+    private List<Recenzie> recenzii;
+
+    public Curs(String titlu, String categorie, double pret, int idInstructor) {
+        this.id = cursCounter++;
         this.titlu = titlu;
         this.categorie = categorie;
         this.pret = pret;
         this.idInstructor = idInstructor;
+        this.lectii = new ArrayList<>();
+        this.quizuri = new ArrayList<>();
+        this.recenzii = new ArrayList<>();
     }
 
-    public int getId() {
-        return id;
+    public List<Lectie> getLectii() { return lectii; }
+    public List<Quiz> getQuizuri() { return quizuri; }
+    public int getId() { return id; }
+    public String getTitlu() { return titlu; }
+    public double getPret() { return pret; }
+    public int getIdInstructor() {
+        return idInstructor;
     }
-
-    public String getTitlu() {
-        return titlu;
+    public void setPret(double pret) {
+        this.pret = pret;
     }
+    public String getCategorie() { return categorie; }
 
-    public void setTitlu(String titlu) { this.titlu = titlu; }
+    public List<Recenzie> getRecenzii() { return recenzii; }
 
-    public String getCategorie() {
-        return categorie;
-    }
-
-    public void setCategorie(String categorie) { this.categorie = categorie; }
-
-    public double getPret() {
-        return pret;
-    }
-
-    public void setPret(double pret) { this.pret = pret; }
-
-    public int getIdInstructor() { return idInstructor; }
+    public void adaugaLectie(Lectie l) { this.lectii.add(l); }
+    public void adaugaQuiz(Quiz q) { this.quizuri.add(q); }
+    public void adaugaRecenzie(Recenzie r) { this.recenzii.add(r); }
 
     @Override
     public boolean equals(Object ob) {
@@ -64,5 +68,10 @@ public class Curs {
     @Override
     public String toString() {
         return "Curs: id = " + id + ", titlu = " + titlu + ", categorie = " + categorie + ", pret = " + pret;
+    }
+
+    @Override
+    public int compareTo(Curs altCurs) {
+        return Double.compare(this.pret, altCurs.pret);
     }
 }
