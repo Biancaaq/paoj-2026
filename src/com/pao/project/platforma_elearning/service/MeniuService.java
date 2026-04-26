@@ -385,9 +385,6 @@ public class MeniuService {
             List<Integer> iduriQuiz = c.extrageIduriQuiz();
             cursService.stergeCurs(titlu);
             evaluareService.stergeDateAsociateCursului(c.getId(), iduriQuiz);
-
-            cursService.stergeCurs(titlu);
-            evaluareService.stergeDateAsociateCursului(c.getId(), iduriQuiz);
         }
 
         else {
