@@ -11,6 +11,10 @@ public class Recenzie {
         this.comentariu = comentariu;
     }
 
+    public int getIdCursant() {
+        return idCursant;
+    }
+
     @Override
     public String toString() {
         return "Recenzie: rating = " + rating + "/5" + ", comentariu = " + comentariu;

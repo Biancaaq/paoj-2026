@@ -108,15 +108,29 @@ public class EvaluareService {
         System.out.println("Datele asociate cursului au fost sterse");
     }
 
-    public void stergeInrolare(int idInrolare) {
+    public void stergeDateInrolare(int idInrolare, int idCursant, List<Integer> iduriQuiz) {
         boolean eliminat = inrolari.removeIf(i -> i.getIdInrolare() == idInrolare);
 
         if (eliminat) {
-            System.out.println("Inrolarea cu ID-ul " + idInrolare + " a fost eliminata cu succes");
+            scoruri.removeIf(s -> s.getIdCursant() == idCursant && iduriQuiz.contains(s.getIdQuiz()));
+            System.out.println("Inrolarea si scorurile asociate au fost eliminate definitiv din sistem");
         }
 
         else {
             System.out.println("Inrolarea cu ID-ul respectiv nu a fost gasita");
         }
+    }
+
+    public void inregistreazaParcurgereLectie(Inrolare inrolare, int numarTotalLectii) {
+        if (numarTotalLectii == 0) return;
+
+        double crestere = 100.0 / numarTotalLectii;
+        double progresNou = inrolare.getProgres() + crestere;
+
+        if (progresNou >= 99.9) {
+            progresNou = 100.0;
+        }
+
+        inrolare.setProgres(progresNou);
     }
 }

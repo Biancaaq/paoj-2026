@@ -74,4 +74,18 @@ public class Curs implements Comparable<Curs> {
     public int compareTo(Curs altCurs) {
         return Double.compare(this.pret, altCurs.pret);
     }
+
+    public void stergeRecenzieCursant(int idCursant) {
+        recenzii.removeIf(r -> r.getIdCursant() == idCursant);
+    }
+
+    public List<Integer> extrageIduriQuiz() {
+        List<Integer> iduri = new ArrayList<>();
+
+        for (Quiz q : this.quizuri) {
+            iduri.add(q.getId());
+        }
+
+        return iduri;
+    }
 }
