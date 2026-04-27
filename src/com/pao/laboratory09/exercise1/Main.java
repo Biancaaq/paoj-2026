@@ -24,6 +24,83 @@ public class Main {
         //   [id] data tip: suma RON | contSursa -> contDestinatie
         //   Ex: [1] 2024-01-15 CREDIT: 1500.00 RON | RO01SRC1 -> RO01DST1
 
-        System.out.println("TODO: implementează exercițiul 1");
+        Scanner scanner = new Scanner(System.in);
+
+        if (!scanner.hasNextInt()) return;
+        int n = scanner.nextInt();
+        List<Tranzactie> tranzactiiInitiale = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            int id = scanner.nextInt();
+            double suma = scanner.nextDouble();
+            String data = scanner.next();
+            String contSursa = scanner.next();
+            String contDestinatie = scanner.next();
+            TipTranzactie tip = TipTranzactie.valueOf(scanner.next());
+
+            Tranzactie t = new Tranzactie(id, suma, data, contSursa, contDestinatie, tip);
+
+            t.setNote("procesat");
+            tranzactiiInitiale.add(t);
+        }
+
+        File outputDir = new File("output");
+        if (!outputDir.exists()) outputDir.mkdirs();
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(OUTPUT_FILE))) {
+            oos.writeObject(tranzactiiInitiale);
+        }
+
+        List<Tranzactie> tranzactiiRecuperate;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(OUTPUT_FILE))) {
+            tranzactiiRecuperate = (List<Tranzactie>) ois.readObject();
+        }
+
+        while (scanner.hasNext()) {
+            String comanda = scanner.next();
+            switch (comanda) {
+                case "LIST":
+                    tranzactiiRecuperate.forEach(System.out::println);
+                    break;
+
+                case "FILTER":
+                    String prefix = scanner.next();
+                    boolean gasit = false;
+
+                    for (Tranzactie t : tranzactiiRecuperate) {
+                        if (t.getData().startsWith(prefix)) {
+                            System.out.println(t);
+                            gasit = true;
+                        }
+                    }
+
+                    if (!gasit) {
+                        System.out.println("Niciun rezultat.");
+                    }
+
+                    break;
+
+                case "NOTE":
+                    int idCautat = scanner.nextInt();
+                    Tranzactie gasita = null;
+
+                    for (Tranzactie t : tranzactiiRecuperate) {
+                        if (t.getId() == idCautat) {
+                            gasita = t;
+                            break;
+                        }
+                    }
+
+                    if (gasita != null) {
+                        System.out.println("NOTE[" + idCautat + "]: " + gasita.getNote());
+                    }
+
+                    else {
+                        System.out.println("NOTE[" + idCautat + "]: not found");
+                    }
+
+                    break;
+            }
+        }
     }
 }
