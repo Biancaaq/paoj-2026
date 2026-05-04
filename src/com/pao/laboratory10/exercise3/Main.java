@@ -46,7 +46,7 @@ public class Main {
                 new Tranzactie(10, 800.0, "2024-01-05", TipTranzactie.CREDIT, "RO02INGB")
         );
 
-        System.out.println("1. Filtrare tip == CREDIT:");
+        System.out.println("1. Filtrare tip (e CREDIT):");
         tranzactii.stream().filter(t -> t.getTip() == TipTranzactie.CREDIT).forEach(System.out::println);
 
         System.out.println("\n2. Total procesat:");
