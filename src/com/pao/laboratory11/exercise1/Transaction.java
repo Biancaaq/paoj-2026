@@ -9,7 +9,6 @@ public class Transaction {
     private final LocalDate date;
     private final String country;
     private final String channel;
-    private int score;
 
     public Transaction(int id, BigDecimal amount, LocalDate date, String country, String channel) {
         this.id = id;
@@ -24,6 +23,4 @@ public class Transaction {
     public LocalDate getDate() { return date; }
     public String getCountry() { return country; }
     public String getChannel() { return channel; }
-    public int getScore() { return score; }
-    public void setScore(int score) { this.score = score; }
 }

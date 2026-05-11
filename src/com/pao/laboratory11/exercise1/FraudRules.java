@@ -1,34 +1,56 @@
 package com.pao.laboratory11.exercise1;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
 public class FraudRules {
-    public static final BigDecimal AMOUNT_THRESHOLD = new BigDecimal("1000.00");
-    public static final Set<String> RISKY_COUNTRIES = Set.of("NG", "RU", "UA", "CN", "BR");
-    public static final Set<String> SUSPICIOUS_CHANNELS = Set.of("WEB", "MOBILE");
+    public static final Set<String> HIGH_RISK_COUNTRIES = Set.of("RU", "NG", "IR", "KP", "SY");
+    public static final Map<String, Integer> CHANNEL_SCORE = Map.of(
+            "WEB", 15,
+            "APP", 10,
+            "CRYPTO", 30,
+            "POS", 5,
+            "ATM", 0
+    );
 
-    public static Predicate<Transaction> amountOverThreshold = t -> t.getAmount().compareTo(AMOUNT_THRESHOLD) > 0;
-    public static Predicate<Transaction> countryInRisk = t -> RISKY_COUNTRIES.contains(t.getCountry().toUpperCase());
-    public static Predicate<Transaction> channelSuspicious = t -> SUSPICIOUS_CHANNELS.contains(t.getChannel().toUpperCase());
+    public static final int FLAG_THRESHOLD = 60;
 
-    public static Predicate<Transaction> flaggedRule = amountOverThreshold.or(countryInRisk).or(channelSuspicious);
+    public static Predicate<Transaction> amountOverThreshold = t -> t.getAmount().compareTo(new BigDecimal("1000")) >= 0;
+    public static Predicate<Transaction> countryInRisk = t -> HIGH_RISK_COUNTRIES.contains(t.getCountry());
+    public static Predicate<Transaction> channelSuspicious = t -> Set.of("WEB", "APP", "CRYPTO").contains(t.getChannel());
 
     public static int computeScore(Transaction t) {
-        int amountScore = Math.min(50, t.getAmount().divide(new BigDecimal("1000"), 0, RoundingMode.DOWN).intValue() * 10);
+        int score = 0;
+        double amt = t.getAmount().doubleValue();
 
-        int countryScore = RISKY_COUNTRIES.contains(t.getCountry().toUpperCase()) ? 20 : 0;
+        if (amt >= 5000) {
+            score += 70;
+        }
 
-        int channelScore = switch (t.getChannel().toUpperCase()) {
-            case "WEB" -> 22;
-            case "MOBILE", "APP" -> 10;
-            case "ATM" -> 5;
-            case "POS" -> 3;
-            default -> 0;
-        };
+        else if (amt >= 1000) {
+            score += 40;
+        }
 
-        return amountScore + countryScore + channelScore;
+        else if (amt >= 500) {
+            score += 20;
+        }
+
+        if (amt <= 100) {
+            score += 5;
+        }
+
+        if (HIGH_RISK_COUNTRIES.contains(t.getCountry())) {
+            score += 25;
+        }
+
+        score += CHANNEL_SCORE.getOrDefault(t.getChannel(), 0);
+
+        return score;
+    }
+
+    public static String getVerdict(int score) {
+        return score >= FLAG_THRESHOLD ? "FLAG" : "ALLOW";
     }
 }
