@@ -1,4 +1,4 @@
-package com.pao.project.platforma_elearning.model;
+package com.pao.project.platforma_elearning.src.model;
 
 import java.time.LocalDateTime;
 

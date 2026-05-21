@@ -1,9 +1,9 @@
-package com.pao.project.platforma_elearning.service;
+package com.pao.project.platforma_elearning.src.service;
 
-import com.pao.project.platforma_elearning.exception.EntitateExistentaException;
-import com.pao.project.platforma_elearning.exception.UtilizatorNegasitException;
-import com.pao.project.platforma_elearning.model.Cursant;
-import com.pao.project.platforma_elearning.model.Utilizator;
+import com.pao.project.platforma_elearning.src.exception.EntitateExistentaException;
+import com.pao.project.platforma_elearning.src.exception.UtilizatorNegasitException;
+import com.pao.project.platforma_elearning.src.model.Cursant;
+import com.pao.project.platforma_elearning.src.model.Utilizator;
 
 import java.util.HashMap;
 import java.util.Map;

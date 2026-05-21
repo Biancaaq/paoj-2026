@@ -1,8 +1,8 @@
-package com.pao.project.platforma_elearning.service;
+package com.pao.project.platforma_elearning.src.service;
 
-import com.pao.project.platforma_elearning.model.Certificat;
-import com.pao.project.platforma_elearning.model.Inrolare;
-import com.pao.project.platforma_elearning.model.ScorQuiz;
+import com.pao.project.platforma_elearning.src.model.Certificat;
+import com.pao.project.platforma_elearning.src.model.Inrolare;
+import com.pao.project.platforma_elearning.src.model.ScorQuiz;
 
 import java.util.ArrayList;
 import java.util.List;

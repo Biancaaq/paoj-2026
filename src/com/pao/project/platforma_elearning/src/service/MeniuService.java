@@ -1,7 +1,7 @@
-package com.pao.project.platforma_elearning.service;
+package com.pao.project.platforma_elearning.src.service;
 
-import com.pao.project.platforma_elearning.model.*;
-import com.pao.project.platforma_elearning.exception.*;
+import com.pao.project.platforma_elearning.src.model.*;
+import com.pao.project.platforma_elearning.src.exception.*;
 
 import java.util.List;
 import java.util.Scanner;

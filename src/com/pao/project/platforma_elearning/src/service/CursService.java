@@ -1,7 +1,7 @@
-package com.pao.project.platforma_elearning.service;
+package com.pao.project.platforma_elearning.src.service;
 
-import com.pao.project.platforma_elearning.exception.EntitateExistentaException;
-import com.pao.project.platforma_elearning.model.Curs;
+import com.pao.project.platforma_elearning.src.exception.EntitateExistentaException;
+import com.pao.project.platforma_elearning.src.model.Curs;
 
 import java.util.ArrayList;
 import java.util.Collections;

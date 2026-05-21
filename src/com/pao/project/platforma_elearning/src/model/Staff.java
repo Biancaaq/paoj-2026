@@ -1,4 +1,4 @@
-package com.pao.project.platforma_elearning.model;
+package com.pao.project.platforma_elearning.src.model;
 
 public abstract class Staff extends Utilizator {
     protected double salariu;
