@@ -10,6 +10,10 @@ public class Instructor extends Staff {
         this.venituriIncasate = 0.0;
     }
 
+    public String getSpecializare() {
+        return specializare;
+    }
+
     @Override
     public String getTipUtilizator() {
         return "INSTRUCTOR";

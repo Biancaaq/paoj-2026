@@ -21,21 +21,23 @@ public class Inrolare {
     public int getIdInrolare() {
         return idInrolare;
     }
-
     public int getIdCursant() {
         return idCursant;
     }
-
     public int getIdCurs() {
         return idCurs;
     }
-
     public double getProgres() {
         return progres;
     }
-
     public void setProgres(double progress) {
         this.progres = progress;
+    }
+    public void setIdInrolare(int idInrolare) {
+        this.idInrolare = idInrolare;
+    }
+    public LocalDate getDataInrolarii() {
+        return dataInrolarii;
     }
 
     @Override

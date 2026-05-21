@@ -38,6 +38,9 @@ public class Curs implements Comparable<Curs> {
         this.pret = pret;
     }
     public String getCategorie() { return categorie; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public List<Recenzie> getRecenzii() { return recenzii; }
 

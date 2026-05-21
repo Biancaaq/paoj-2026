@@ -18,6 +18,9 @@ public abstract class Utilizator {
     public String getNume() { return nume; }
     public String getEmail() { return email; }
     public String getParola() { return parola; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public abstract String getTipUtilizator();
 
