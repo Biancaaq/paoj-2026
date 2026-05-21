@@ -97,6 +97,32 @@ public class InrolareRepository implements Repository<Inrolare, Integer> {
         }
     }
 
+    public void afiseazaSituatieCursuriStudent(int idStudent) {
+        String sql = "SELECT i.id, c.titlu, i.data_inrolarii, i.progres " + "FROM Inrolare i " + "JOIN Curs c ON i.id_curs = c.id " + "WHERE i.id_cursant = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, idStudent);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                System.out.println("\nCursurile tale inrolate (Date din DB)");
+                boolean areCursuri = false;
+
+                while (rs.next()) {
+                    areCursuri = true;
+                    System.out.println("Inrolare ID: " + rs.getInt("id") + " | Curs: " + rs.getString("titlu") + " | Data: " + rs.getString("data_inrolarii") + " | Progres: " + rs.getDouble("progres") + "%");
+                }
+
+                if (!areCursuri) {
+                    System.out.println("Nu esti inrolat in niciun curs momentan");
+                }
+            }
+        }
+
+        catch (SQLException e) {
+            System.out.println("Eroare la preluarea situatiei studentului: " + e.getMessage());
+        }
+    }
+
     private Inrolare mapRowToInrolare(ResultSet rs) throws SQLException {
         Inrolare i = new Inrolare(rs.getInt("id_cursant"), rs.getInt("id_curs"));
         i.setIdInrolare(rs.getInt("id"));

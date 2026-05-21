@@ -100,6 +100,44 @@ public class CursRepository implements Repository<Curs, Integer> {
         }
     }
 
+    public void afiseazaCursuriCuInstructori() {
+        String sql = "SELECT c.id, c.titlu, c.categorie, c.pret, u.nume AS nume_instructor " + "FROM Curs c " + "JOIN Utilizator u ON c.id_instructor = u.id";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            System.out.println("\nCatalog cursuri (Informatii complete din DB)");
+
+            while (rs.next()) {
+                System.out.println("Curs: [" + rs.getInt("id") + "] " + rs.getString("titlu") + " | Categorie: " + rs.getString("categorie") + " | Pret: " + rs.getDouble("pret") + " RON" + " | Profesor: " + rs.getString("nume_instructor"));
+            }
+        }
+
+        catch (SQLException e) {
+            System.out.println("Eroare la executarea interogarii cu JOIN: " + e.getMessage());
+        }
+    }
+
+    public void afiseazaTopCursuriPopulare() {
+        String sql = "SELECT c.id, c.titlu, COUNT(i.id) AS numar_studenti " + "FROM Curs c " + "LEFT JOIN Inrolare i ON c.id = i.id_curs " + "GROUP BY c.id " + "ORDER BY numar_studenti DESC " + "LIMIT 3";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            System.out.println("\nTop 3 cursuri cu cei mai multi studenti");
+            int pozitie = 1;
+
+            while (rs.next()) {
+                System.out.println(pozitie + ". " + rs.getString("titlu") + " -> " + rs.getInt("numar_studenti") + " studenti inrolati");
+                pozitie++;
+            }
+        }
+
+        catch (SQLException e) {
+            System.out.println("Eroare la generarea topului de popularitate: " + e.getMessage());
+        }
+    }
+
     private Curs mapRowToCurs(ResultSet rs) throws SQLException {
         Curs c = new Curs(
                 rs.getString("titlu"),
