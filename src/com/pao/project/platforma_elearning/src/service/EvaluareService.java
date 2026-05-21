@@ -3,7 +3,11 @@ package com.pao.project.platforma_elearning.src.service;
 import com.pao.project.platforma_elearning.src.model.Certificat;
 import com.pao.project.platforma_elearning.src.model.Inrolare;
 import com.pao.project.platforma_elearning.src.model.ScorQuiz;
+import com.pao.project.platforma_elearning.src.util.DatabaseConnection;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +19,8 @@ public class EvaluareService {
     private List<Inrolare> inrolari = new ArrayList<>();
     private List<ScorQuiz> scoruri = new ArrayList<>();
 
+    private final Connection connection = DatabaseConnection.getInstance().getConnection();
+
     private EvaluareService() {}
 
     public static EvaluareService getInstance() {
@@ -23,6 +29,67 @@ public class EvaluareService {
         }
 
         return instance;
+    }
+
+    public boolean achizitioneazaCursTranzactional(com.pao.project.platforma_elearning.src.model.Cursant cursant, com.pao.project.platforma_elearning.src.model.Curs curs) {
+        if (cursant.getPortofelVirtual() < curs.getPret()) {
+            System.out.println("Eroare: Fonduri insuficiente în portofelul virtual!");
+            return false;
+        }
+
+        String sqlUpdatePortofel = "UPDATE Utilizator SET portofel_virtual = ? WHERE id = ?";
+        String sqlInsertInrolare = "INSERT INTO Inrolare (id_cursant, id_curs, data_inrolarii, progres) VALUES (?, ?, ?, ?)";
+
+        try {
+            connection.setAutoCommit(false);
+
+            double noulSold = cursant.getPortofelVirtual() - curs.getPret();
+
+            try (PreparedStatement pstmtUser = connection.prepareStatement(sqlUpdatePortofel)) {
+                pstmtUser.setDouble(1, noulSold);
+                pstmtUser.setInt(2, cursant.getId());
+                pstmtUser.executeUpdate();
+            }
+
+            try (PreparedStatement pstmtInr = connection.prepareStatement(sqlInsertInrolare)) {
+                pstmtInr.setInt(1, cursant.getId());
+                pstmtInr.setInt(2, curs.getId());
+                pstmtInr.setString(3, java.time.LocalDate.now().toString());
+                pstmtInr.setDouble(4, 0.0);
+                pstmtInr.executeUpdate();
+            }
+
+            connection.commit();
+
+            cursant.setPortofelVirtual(noulSold);
+            Inrolare nouaInrolare = new Inrolare(cursant.getId(), curs.getId());
+            inrolari.add(nouaInrolare);
+
+            System.out.println("Tranzactie finalizata cu succes! Curs cumparat si inrolare salvata");
+            return true;
+
+        } catch (SQLException e) {
+            try {
+                System.out.println("Eroare in timpul achizitiei! Se executa rollback. Motiv: " + e.getMessage());
+                connection.rollback();
+            }
+
+            catch (SQLException rollbackEx) {
+                System.out.println("Eroare la executarea operatiei de rollback: " + rollbackEx.getMessage());
+            }
+
+            return false;
+        }
+
+        finally {
+            try {
+                connection.setAutoCommit(true);
+            }
+
+            catch (SQLException e) {
+                System.out.println("Eroare la resetarea auto-commit: " + e.getMessage());
+            }
+        }
     }
 
     public void adaugaInrolare(Inrolare i) {
@@ -36,6 +103,7 @@ public class EvaluareService {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -99,6 +167,7 @@ public class EvaluareService {
                 return true;
             }
         }
+
         return false;
     }
 
