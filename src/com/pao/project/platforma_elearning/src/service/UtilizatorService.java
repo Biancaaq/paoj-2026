@@ -4,13 +4,14 @@ import com.pao.project.platforma_elearning.src.exception.EntitateExistentaExcept
 import com.pao.project.platforma_elearning.src.exception.UtilizatorNegasitException;
 import com.pao.project.platforma_elearning.src.model.Cursant;
 import com.pao.project.platforma_elearning.src.model.Utilizator;
+import com.pao.project.platforma_elearning.src.repository.UtilizatorRepository;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
 public class UtilizatorService {
     private static UtilizatorService instance;
-    private Map<String, Utilizator> utilizatori = new HashMap<>();
+    private final UtilizatorRepository utilizatorRepository = new UtilizatorRepository();
 
     private UtilizatorService() {}
 
@@ -23,34 +24,46 @@ public class UtilizatorService {
     }
 
     public void inregistrare(Utilizator u) throws EntitateExistentaException {
-        if (utilizatori.containsKey(u.getEmail())) {
+        boolean exista = utilizatorRepository.findAll().stream().anyMatch(user -> user.getEmail().equalsIgnoreCase(u.getEmail()));
+
+        if (exista) {
             throw new EntitateExistentaException("Email-ul " + u.getEmail() + " este deja folosit");
         }
 
-        utilizatori.put(u.getEmail(), u);
-        System.out.println("Utilizator inregistrat cu succes: " + u.getNume());
+        utilizatorRepository.save(u);
+        System.out.println("Utilizator salvat in baza de date cu succes: " + u.getNume());
     }
 
     public Utilizator login(String email, String parola) throws UtilizatorNegasitException {
-        Utilizator u = utilizatori.get(email);
+        Optional<Utilizator> u = utilizatorRepository.findAll().stream().filter(user -> user.getEmail().equalsIgnoreCase(email) && user.getParola().equals(parola)).findFirst();
 
-        if (u == null || !u.getParola().equals(parola)) {
+        if (u.isEmpty()) {
             throw new UtilizatorNegasitException("Email sau parola incorecta");
         }
 
-        return u;
+        return u.get();
     }
 
     public void afiseazaTotiUtilizatorii() {
-        utilizatori.values().forEach(System.out::println);
+        List<Utilizator> toti = utilizatorRepository.findAll();
+
+        if (toti.isEmpty()) {
+            System.out.println("Nu exista utilizatori in baza de date");
+        }
+
+        else {
+            toti.forEach(System.out::println);
+        }
     }
 
     public void alimenteazaPortofel(String email, double suma) throws UtilizatorNegasitException {
-        Utilizator u = utilizatori.get(email);
-        if (u instanceof Cursant) {
-            Cursant c = (Cursant) u;
+        Optional<Utilizator> opt = utilizatorRepository.findAll().stream().filter(user -> user.getEmail().equalsIgnoreCase(email)).findFirst();
+
+        if (opt.isPresent() && opt.get() instanceof Cursant) {
+            Cursant c = (Cursant) opt.get();
             c.setPortofelVirtual(c.getPortofelVirtual() + suma);
-            System.out.println("Portofel actualizat. Sold nou: " + c.getPortofelVirtual());
+            utilizatorRepository.update(c);
+            System.out.println("Portofel actualizat in DB. Sold nou: " + c.getPortofelVirtual());
         }
 
         else {

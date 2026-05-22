@@ -54,8 +54,8 @@ public class CursRepository implements Repository<Curs, Integer> {
         List<Curs> cursuri = new ArrayList<>();
         String sql = "SELECT * FROM Curs";
 
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 cursuri.add(mapRowToCurs(rs));
             }
@@ -106,7 +106,7 @@ public class CursRepository implements Repository<Curs, Integer> {
         try (PreparedStatement pstmt = connection.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
-            System.out.println("\nCatalog cursuri (Informatii complete din DB)");
+            System.out.println("\nCatalog cursuri (din DB)");
 
             while (rs.next()) {
                 System.out.println("Curs: [" + rs.getInt("id") + "] " + rs.getString("titlu") + " | Categorie: " + rs.getString("categorie") + " | Pret: " + rs.getDouble("pret") + " RON" + " | Profesor: " + rs.getString("nume_instructor"));

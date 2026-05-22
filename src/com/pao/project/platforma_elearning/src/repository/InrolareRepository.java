@@ -54,8 +54,8 @@ public class InrolareRepository implements Repository<Inrolare, Integer> {
         List<Inrolare> inrolari = new ArrayList<>();
         String sql = "SELECT * FROM Inrolare";
 
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 inrolari.add(mapRowToInrolare(rs));
             }
@@ -104,7 +104,7 @@ public class InrolareRepository implements Repository<Inrolare, Integer> {
             pstmt.setInt(1, idStudent);
 
             try (ResultSet rs = pstmt.executeQuery()) {
-                System.out.println("\nCursurile tale inrolate (Date din DB)");
+                System.out.println("\nCursurile tale inrolate (din DB)");
                 boolean areCursuri = false;
 
                 while (rs.next()) {

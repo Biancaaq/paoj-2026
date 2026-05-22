@@ -3,7 +3,6 @@ package com.pao.project.platforma_elearning.src.service;
 import com.pao.project.platforma_elearning.src.model.*;
 import com.pao.project.platforma_elearning.src.exception.*;
 
-import java.util.List;
 import java.util.Scanner;
 
 public class MeniuService {
@@ -45,15 +44,15 @@ public class MeniuService {
 
     private void afiseazaMeniuStart() {
         System.out.println("\nPlatforma e-learning");
-        System.out.println("1. Login\n2. Inregistrare cursant\n3. Inregistrare instructor\n4. Rulare exemplu\n0. Inchide aplicatia");
+        System.out.println("1. Login\n2. Inregistrare cursant\n3. Inregistrare instructor\n0. Inchide aplicatia");
         System.out.print("Selectie: ");
 
         int opt = citesteIntreg();
+
         switch (opt) {
             case 1 -> executaLogin();
             case 2 -> executaInregistrare(true);
             case 3 -> executaInregistrare(false);
-            case 4 -> ruleazaScenariuDemonstrativ();
             case 0 -> System.exit(0);
             default -> System.out.println("Optiune invalida");
         }
@@ -88,6 +87,7 @@ public class MeniuService {
 
         try {
             utilizatorLogat = utilizatorService.login(email, parola);
+            AuditService.getInstance().logActiune("login_utilizator_succes");
             System.out.println("Autentificare reusita!");
         }
 
@@ -109,15 +109,17 @@ public class MeniuService {
         try {
             if (esteCursant) {
                 utilizatorService.inregistrare(new Cursant(nume, email, parola, 0));
+                AuditService.getInstance().logActiune("inregistrare_cursant");
                 System.out.println("Cont de cursant creat. Va puteti loga");
             }
 
             else {
-                System.out.print("Specializare: "); String spec = scanner.nextLine();
+                System.out.print("Specializare: ");
+                String spec = scanner.nextLine();
                 utilizatorService.inregistrare(new Instructor(nume, email, parola, 3000, spec));
+                AuditService.getInstance().logActiune("inregistrare_instructor");
                 System.out.println("Cont de instructor creat. Va puteti loga");
             }
-
         }
 
         catch (EntitateExistentaException e) {
@@ -125,110 +127,8 @@ public class MeniuService {
         }
     }
 
-    public void ruleazaScenariuDemonstrativ() {
-        System.out.println("\nScenariu exemplu");
-
-        try {
-            System.out.println("\nActiunea 1 & 2: Inregistrare utilizatori");
-            Instructor instructor = new Instructor("Andrei Popescu", "andrei@curs.ro", "pass1", 5000, "Java Development");
-            Cursant cursant = new Cursant("Ionut Alexandrescu", "ionut@stud.ro", "pass2", 0);
-            utilizatorService.inregistrare(instructor);
-            utilizatorService.inregistrare(cursant);
-
-            System.out.println("\nActiunea 3: Login");
-            this.utilizatorLogat = utilizatorService.login("ionut@stud.ro", "pass2");
-            System.out.println("Login reusit pentru: " + utilizatorLogat.getNume());
-
-            System.out.println("\nActiunea 4: Alimentare portofel");
-            utilizatorService.alimenteazaPortofel(cursant.getEmail(), 200.0);
-
-            System.out.println("\nActiunea 5: Adaugare curs");
-            Curs cursJava = new Curs("Programare Java Pro", "IT", 150.0, instructor.getId());
-            cursService.adaugaCurs(cursJava);
-            System.out.println("Curs creat cu succes!");
-
-            System.out.println("\nActiunea 11: Cautare curs (dupa categorie)");
-            cursService.afiseazaCursuriDupaCategorie("IT");
-
-            System.out.println("\nActiunea 6: Inrolare cursant");
-            executaInrolareDirecta(cursant, cursJava);
-
-            System.out.println("\nActiunea 7: Adaugare lectie");
-            cursJava.adaugaLectie(new Lectie("Introducere in OOP", 45, "Clase si obiecte"));
-            System.out.println("Lectie adaugata");
-
-            System.out.println("\nActiunea 8: Creare quiz");
-            Quiz q1 = new Quiz(101, "Test Initial", 5, 5.0);
-            cursJava.adaugaQuiz(q1);
-            System.out.println("Quiz adaugat");
-
-            System.out.println("\nActiunea 9: Sustinere quiz");
-            evaluareService.salveazaScorQuiz(cursant.getId(), q1.getId(), 8.5);
-
-            System.out.println("\nActiunea 13: Afisare clasament");
-            afiseazaClasamentQuiz();
-
-            System.out.println("\nActiunea 14: Modificare pret curs");
-            cursJava.setPret(120.0);
-            System.out.println("Pret nou: " + cursJava.getPret());
-            System.out.println("Pret actualizat");
-
-            System.out.println("\nSectiune Studiu: Parcurgere lectie");
-            Inrolare inr = evaluareService.cautaInrolare(1);
-
-            if (inr != null) {
-                System.out.println("Lectii disponibile in curs:");
-                cursJava.getLectii().forEach(l -> System.out.println("  - " + l.getTitlu() + " (" + l.getDurataMinute() + " min)"));
-
-                System.out.println("\nQuiz-uri disponibile in curs:");
-
-                if (cursJava.getQuizuri().isEmpty()) {
-                    System.out.println("Niciun quiz disponibil inca");
-                }
-
-                else {
-                    cursJava.getQuizuri().forEach(q -> System.out.println("  - ID: " + q.getId() + " | Titlu: " + q.getTitlu()));
-                }
-
-                System.out.println("");
-
-                evaluareService.inregistreazaParcurgereLectie(inr, cursJava.getLectii().size());
-
-                System.out.println("Ai ales sa parcurgi o lectie. Progresul tau a crescut la " + String.format("%.1f", inr.getProgres()) + "%");
-
-                System.out.println("\nActiunea 10: Generare certificat");
-                evaluareService.genereazaCertificat(cursant.getNume(), cursJava.getTitlu(), inr.getProgres());
-            }
-
-            System.out.println("\nActiunea 12: Adaugare recenzie");
-            cursJava.adaugaRecenzie(new Recenzie(cursant.getId(), 5, "Excelent!"));
-            System.out.println("Recenzie salvata in sistem si vizibila pentru instructor");
-
-            System.out.println("\nActiunea 15: Stergere curs");
-            List<Integer> iduriQuiz = cursJava.extrageIduriQuiz();
-            cursService.stergeCurs(cursJava.getTitlu());
-            evaluareService.stergeDateAsociateCursului(cursJava.getId(), iduriQuiz);
-
-            System.out.println("\n");
-            this.utilizatorLogat = null;
-
-        }
-
-        catch (Exception e) {
-            System.out.println("Eroare in demo: " + e.getMessage());
-        }
-    }
-
-    private void executaInrolareDirecta(Cursant c, Curs curs) throws Exception {
-        if (c.getPortofelVirtual() >= curs.getPret()) {
-            c.setPortofelVirtual(c.getPortofelVirtual() - curs.getPret());
-            evaluareService.adaugaInrolare(new Inrolare(c.getId(), curs.getId()));
-            System.out.println("Inrolare reusita pentru: " + curs.getTitlu());
-        }
-    }
-
     private void afiseazaOptiuniAdmin() {
-        System.out.println("1. Afiseaza toti utilizatorii\n2. Sterge un curs din platforma\n3. Afiseaza clasament quiz");
+        System.out.println("1. Afiseaza toti utilizatorii\n2. Sterge un curs din platforma\n3. Afiseaza clasament quiz\n4. Afiseaza rapoarte complexe");
     }
 
     private void afiseazaOptiuniInstructor() {
@@ -251,45 +151,103 @@ public class MeniuService {
         try {
             if (utilizatorLogat instanceof Admin) {
                 switch (opt) {
-                    case 1 -> utilizatorService.afiseazaTotiUtilizatorii();
+                    case 1 -> {
+                        AuditService.getInstance().logActiune("vizualizare_utilizatori");
+                        utilizatorService.afiseazaTotiUtilizatorii();
+                    }
                     case 2 -> {
+                        AuditService.getInstance().logActiune("stergere_curs_admin");
                         System.out.print("Titlu curs de sters: ");
                         cursService.stergeCurs(scanner.nextLine());
                     }
-                    case 3 -> afiseazaClasamentQuiz();
+                    case 3 -> {
+                        AuditService.getInstance().logActiune("vizualizare_clasament_admin");
+                        afiseazaClasamentQuiz();
+                    }
+                    case 4 -> {
+                        AuditService.getInstance().logActiune("vizualizare_rapoarte_join");
+                        executaRapoarteComplexeJoin();
+                    }
                 }
             }
 
             else if (utilizatorLogat instanceof Instructor) {
                 switch (opt) {
-                    case 1 -> executaAdaugareCurs();
-                    case 2 -> executaAdaugareLectie();
-                    case 3 -> executaAdaugareQuiz();
-                    case 4 -> executaModificarePret();
-                    case 5 -> cursService.afiseazaCursuriInstructor(utilizatorLogat.getId());
-                    case 6 -> executaVizualizareRecenziiInstructor();
-                    case 7 -> executaStergereCursPropriu();
-                    case 8 -> afiseazaClasamentQuiz();
+                    case 1 -> {
+                        AuditService.getInstance().logActiune("creare_curs");
+                        executaAdaugareCurs();
+                    }
+                    case 2 -> {
+                        AuditService.getInstance().logActiune("adaugare_lectie");
+                        executaAdaugareLectie();
+                    }
+                    case 3 -> {
+                        AuditService.getInstance().logActiune("adaugare_quiz");
+                        executaAdaugareQuiz();
+                    }
+                    case 4 -> {
+                        AuditService.getInstance().logActiune("modificare_pret_curs");
+                        executaModificarePret();
+                    }
+                    case 5 -> {
+                        AuditService.getInstance().logActiune("vizualizare_cursuri_proprii");
+                        cursService.afiseazaCursuriInstructor(utilizatorLogat.getId());
+                    }
+                    case 6 -> {
+                        AuditService.getInstance().logActiune("vizualizare_recenzii");
+                        executaVizualizareRecenziiInstructor();
+                    }
+                    case 7 -> {
+                        AuditService.getInstance().logActiune("stergere_curs_instructor");
+                        executaStergereCursPropriu();
+                    }
+                    case 8 -> {
+                        AuditService.getInstance().logActiune("vizualizare_clasament_instructor");
+                        afiseazaClasamentQuiz();
+                    }
                 }
             }
 
             else if (utilizatorLogat instanceof Cursant) {
                 switch (opt) {
-                    case 1 -> executaAlimentarePortofel();
-                    case 2 -> cursService.afiseazaCursuriDupaPret();
-                    case 3 -> executaInrolare();
-                    case 4 -> executaSesiuneStudiu();
-                    case 5 -> evaluareService.afiseazaInrolariUtilizator(utilizatorLogat.getId());
+                    case 1 -> {
+                        AuditService.getInstance().logActiune("alimentare_portofel");
+                        executaAlimentarePortofel();
+                    }
+                    case 2 -> {
+                        AuditService.getInstance().logActiune("vizualizare_catalog");
+                        cursService.afiseazaCursuriDupaPret();
+                    }
+                    case 3 -> {
+                        AuditService.getInstance().logActiune("cerere_inrolare");
+                        executaInrolare();
+                    }
+                    case 4 -> {
+                        AuditService.getInstance().logActiune("sesiune_studiu");
+                        executaSesiuneStudiu();
+                    }
+                    case 5 -> {
+                        AuditService.getInstance().logActiune("vizualizare_progres");
+                        evaluareService.afiseazaInrolariUtilizator(utilizatorLogat.getId());
+                        com.pao.project.platforma_elearning.src.repository.InrolareRepository inrRepo = new com.pao.project.platforma_elearning.src.repository.InrolareRepository();
+                        inrRepo.afiseazaSituatieCursuriStudent(utilizatorLogat.getId());
+                    }
                     case 6 -> {
+                        AuditService.getInstance().logActiune("cautare_categorie");
                         System.out.print("Introdu categoria cautata: ");
                         cursService.afiseazaCursuriDupaCategorie(scanner.nextLine());
                     }
-                    case 7 -> executaStergereInrolare();
+                    case 7 -> {
+                        AuditService.getInstance().logActiune("renuntare_curs");
+                        executaStergereInrolare();
+                    }
                 }
             }
         }
 
-        catch (Exception e) { System.out.println("Eroare: " + e.getMessage()); }
+        catch (Exception e) {
+            System.out.println("Eroare: " + e.getMessage());
+        }
     }
 
     private void executaAdaugareCurs() {
@@ -317,15 +275,18 @@ public class MeniuService {
         Curs c = cursService.cautaCursDupaTitlu(scanner.nextLine());
 
         if (c != null && c.getIdInstructor() == utilizatorLogat.getId()) {
-            System.out.print("Titlu lectie: "); String t = scanner.nextLine();
-            System.out.print("Durata (min): "); int d = citesteIntreg();
+            System.out.print("Titlu lectie: ");
+            String t = scanner.nextLine();
+            System.out.print("Durata (min): ");
+            int d = citesteIntreg();
 
             if (d <= 0) {
                 System.out.println("Eroare: Durata trebuie sa fie un numar valid si pozitiv");
                 return;
             }
 
-            System.out.print("Continut: "); String cont = scanner.nextLine();
+            System.out.print("Continut: ");
+            String cont = scanner.nextLine();
             c.adaugaLectie(new Lectie(t, d, cont));
             System.out.println("Lectie adaugata");
         }
@@ -340,8 +301,10 @@ public class MeniuService {
         Curs c = cursService.cautaCursDupaTitlu(scanner.nextLine());
 
         if (c != null && c.getIdInstructor() == utilizatorLogat.getId()) {
-            System.out.print("Titlu quiz: "); String t = scanner.nextLine();
-            System.out.print("Numar intrebari: "); int nr = citesteIntreg();
+            System.out.print("Titlu quiz: ");
+            String t = scanner.nextLine();
+            System.out.print("Numar intrebari: ");
+            int nr = citesteIntreg();
             c.adaugaQuiz(new Quiz((int)(Math.random()*100) + 1, t, nr, 5.0));
             System.out.println("Quiz adaugat");
         }
@@ -373,7 +336,9 @@ public class MeniuService {
             }
         }
 
-        else System.out.println("Curs negasit sau nu iti apartine");
+        else {
+            System.out.println("Curs negasit sau nu iti apartine");
+        }
     }
 
     private void executaStergereCursPropriu() {
@@ -382,7 +347,7 @@ public class MeniuService {
         Curs c = cursService.cautaCursDupaTitlu(titlu);
 
         if (c != null && c.getIdInstructor() == utilizatorLogat.getId()) {
-            List<Integer> iduriQuiz = c.extrageIduriQuiz();
+            java.util.List iduriQuiz = c.extrageIduriQuiz();
             cursService.stergeCurs(titlu);
             evaluareService.stergeDateAsociateCursului(c.getId(), iduriQuiz);
         }
@@ -400,25 +365,26 @@ public class MeniuService {
             Cursant cursant = (Cursant) utilizatorLogat;
 
             if (evaluareService.esteDejaInrolat(cursant.getId(), c.getId())) {
-                System.out.println("Esti deja inrolat la acest curs!");
-
+                System.out.println("Esti deja inrolat la acest curs");
                 return;
             }
 
             try {
-                if (cursant.getPortofelVirtual() < c.getPret()) {
-                    throw new FonduriInsuficienteException("Sold insuficient");
-                }
-                cursant.setPortofelVirtual(cursant.getPortofelVirtual() - c.getPret());
+                boolean succes = evaluareService.achizitioneazaCursTranzactional(cursant, c);
 
-                evaluareService.adaugaInrolare(new Inrolare(cursant.getId(), c.getId()));
-                System.out.println("Te-ai inrolat cu succes la " + c.getTitlu());
+                if (!succes) {
+                    System.out.println("Inrolarea a esuat din cauza unei erori de sistem");
+                }
             }
 
-            catch (Exception e) { System.out.println(e.getMessage()); }
+            catch (FonduriInsuficienteException e) {
+                System.out.println("Eroare la inrolare: " + e.getMessage());
+            }
         }
 
-        else System.out.println("Cursul nu a fost gasit");
+        else {
+            System.out.println("Cursul nu a fost gasit sau nu esti logat ca student");
+        }
     }
 
     private void executaSesiuneStudiu() {
@@ -431,12 +397,22 @@ public class MeniuService {
             System.out.println("\nSesiune de studiu: " + curs.getTitlu());
 
             System.out.println("Lectii disponibile in curs:");
-            if (curs.getLectii().isEmpty()) System.out.println("Nicio lectie disponibila inca");
-            else curs.getLectii().forEach(l -> System.out.println("  - " + l.getTitlu() + " (" + l.getDurataMinute() + " min)"));
+            if (curs.getLectii().isEmpty()) {
+                System.out.println("Nicio lectie disponibila inca");
+            }
+
+            else {
+                curs.getLectii().forEach(l -> System.out.println("  - " + l.getTitlu() + " (" + l.getDurataMinute() + " min)"));
+            }
 
             System.out.println("\nQuiz-uri disponibile in curs:");
-            if (curs.getQuizuri().isEmpty()) System.out.println("Niciun quiz disponibil inca");
-            else curs.getQuizuri().forEach(q -> System.out.println("  - ID: " + q.getId() + " | Titlu: " + q.getTitlu()));
+            if (curs.getQuizuri().isEmpty()) {
+                System.out.println("Niciun quiz disponibil inca");
+            }
+
+            else {
+                curs.getQuizuri().forEach(q -> System.out.println("  - ID: " + q.getId() + " | Titlu: " + q.getTitlu()));
+            }
 
             System.out.println("\nAlegeri disponibile:");
             System.out.println("1. Parcurge o lectie");
@@ -529,10 +505,8 @@ public class MeniuService {
         if (inr != null && inr.getIdCursant() == utilizatorLogat.getId()) {
             Curs curs = cursService.cautaCursDupaId(inr.getIdCurs());
 
-            List<Integer> iduriQuiz = curs.extrageIduriQuiz();
-
-            evaluareService.stergeDateInrolare(idInr, utilizatorLogat.getId(), iduriQuiz);
-
+            // Pasam direct rezultatul fara sa mai declaram noi o variabila cu tip conflictual
+            evaluareService.stergeDateInrolare(idInr, utilizatorLogat.getId(), curs.extrageIduriQuiz());
             curs.stergeRecenzieCursant(utilizatorLogat.getId());
 
             System.out.println("Ai renuntat cu succes la cursul: " + curs.getTitlu());
@@ -543,7 +517,6 @@ public class MeniuService {
         }
     }
 
-
     private void executaAlimentarePortofel() {
         System.out.print("Suma de adaugat: ");
         double suma = Double.parseDouble(scanner.nextLine());
@@ -552,7 +525,9 @@ public class MeniuService {
             utilizatorService.alimenteazaPortofel(utilizatorLogat.getEmail(), suma);
         }
 
-        catch (Exception e) { System.out.println(e.getMessage()); }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void afiseazaClasamentQuiz() {
@@ -572,7 +547,24 @@ public class MeniuService {
     }
 
     private int citesteIntreg() {
-        try { return Integer.parseInt(scanner.nextLine()); }
-        catch (Exception e) { return -1; }
+        try {
+            return Integer.parseInt(scanner.nextLine());
+        }
+
+        catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private void executaRapoarteComplexeJoin() {
+        System.out.println("Rapoarte SQL");
+
+        com.pao.project.platforma_elearning.src.repository.CursRepository cursRepo = new com.pao.project.platforma_elearning.src.repository.CursRepository();
+        com.pao.project.platforma_elearning.src.repository.InrolareRepository inrRepo = new com.pao.project.platforma_elearning.src.repository.InrolareRepository();
+        com.pao.project.platforma_elearning.src.repository.CertificatRepository certRepo = new com.pao.project.platforma_elearning.src.repository.CertificatRepository();
+
+        cursRepo.afiseazaCursuriCuInstructori();
+        cursRepo.afiseazaTopCursuriPopulare();
+        certRepo.afiseazaCertificateEmiseCuDetaliiUtilizator();
     }
 }

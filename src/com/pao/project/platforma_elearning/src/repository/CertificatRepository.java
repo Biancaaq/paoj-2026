@@ -13,19 +13,14 @@ public class CertificatRepository implements Repository<Certificat, Integer> {
 
     @Override
     public void save(Certificat entity) {
-        String sql = "INSERT INTO Certificat (cod_unic, id_cursant, titlu_curs, data_emiterii) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Certificat (cod_unic, nume_cursant, titlu_curs, data_emiterii) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, entity.getCodUnic());
-            String sqlAdaptat = "INSERT INTO Certificat (cod_unic, nume_cursant, titlu_curs) VALUES (?, ?, ?)";
-
-            try (PreparedStatement pstmt2 = connection.prepareStatement(sqlAdaptat)) {
-                pstmt2.setString(1, entity.getCodUnic());
-                pstmt2.setString(2, entity.getNumeCursant());
-                pstmt2.setString(3, entity.getNumeCurs());
-                pstmt2.executeUpdate();
-                return;
-            }
+            pstmt.setString(2, entity.getNumeCursant());
+            pstmt.setString(3, entity.getNumeCurs());
+            pstmt.setString(4, java.time.LocalDate.now().toString());
+            pstmt.executeUpdate();
         }
 
         catch (SQLException e) {
@@ -59,8 +54,8 @@ public class CertificatRepository implements Repository<Certificat, Integer> {
         List<Certificat> certificate = new ArrayList<>();
         String sql = "SELECT * FROM Certificat";
 
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 certificate.add(mapRowToCertificat(rs));
             }
@@ -75,7 +70,18 @@ public class CertificatRepository implements Repository<Certificat, Integer> {
 
     @Override
     public void update(Certificat entity) {
-        System.out.println("Modificarea certificatelor imutabile nu este permisa.");
+        String sql = "UPDATE Certificat SET nume_cursant = ?, titlu_curs = ? WHERE cod_unic = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, entity.getNumeCursant());
+            pstmt.setString(2, entity.getNumeCurs());
+            pstmt.setString(3, entity.getCodUnic());
+            pstmt.executeUpdate();
+        }
+
+        catch (SQLException e) {
+            System.out.println("Eroare la actualizarea certificatului: " + e.getMessage());
+        }
     }
 
     @Override
@@ -89,6 +95,24 @@ public class CertificatRepository implements Repository<Certificat, Integer> {
 
         catch (SQLException e) {
             System.out.println("Eroare la stergerea certificatului: " + e.getMessage());
+        }
+    }
+
+    public void afiseazaCertificateEmiseCuDetaliiUtilizator() {
+        String sql = "SELECT cert.id, cert.cod_unic, cert.titlu_curs, u.email " + "FROM Certificat cert " + "JOIN Utilizator u ON cert.nume_cursant = u.nume";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            System.out.println("\nRaport audit certificate emise per email utilizator");
+
+            while (rs.next()) {
+                System.out.println("Certificat: [" + rs.getString("cod_unic") + "] pentru cursul: " + rs.getString("titlu_curs") + " | Email Detinator: " + rs.getString("email"));
+            }
+        }
+
+        catch (SQLException e) {
+            System.out.println("Eroare: " + e.getMessage());
         }
     }
 

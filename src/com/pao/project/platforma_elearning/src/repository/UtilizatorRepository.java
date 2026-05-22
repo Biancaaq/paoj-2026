@@ -13,8 +13,7 @@ public class UtilizatorRepository implements Repository<Utilizator, Integer> {
 
     @Override
     public void save(Utilizator entity) {
-        String sql = "INSERT INTO Utilizator (nume, email, parola, tip_utilizator, portofel_virtual, salariu, specializare) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
+        String sql = "INSERT INTO Utilizator (nume, email, parola, tip_utilizator, portofel_virtual, salariu, specializare, nivel_acces) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, entity.getNume());
             pstmt.setString(2, entity.getEmail());
@@ -25,18 +24,21 @@ public class UtilizatorRepository implements Repository<Utilizator, Integer> {
                 pstmt.setDouble(5, ((Cursant) entity).getPortofelVirtual());
                 pstmt.setDouble(6, 0.0);
                 pstmt.setNull(7, Types.VARCHAR);
+                pstmt.setInt(8, 0);
             }
 
             else if (entity instanceof Instructor) {
                 pstmt.setDouble(5, 0.0);
-                pstmt.setDouble(6, 0.0);
+                pstmt.setDouble(6, ((Instructor) entity).getSalariu());
                 pstmt.setString(7, ((Instructor) entity).getSpecializare());
+                pstmt.setInt(8, 0);
             }
 
-            else {
-                pstmt.setNull(5, Types.DOUBLE);
-                pstmt.setDouble(6, 0.0);
+            else if (entity instanceof Admin) {
+                pstmt.setDouble(5, 0.0);
+                pstmt.setDouble(6, ((Admin) entity).getSalariu());
                 pstmt.setNull(7, Types.VARCHAR);
+                pstmt.setInt(8, 10);
             }
 
             pstmt.executeUpdate();
@@ -73,8 +75,8 @@ public class UtilizatorRepository implements Repository<Utilizator, Integer> {
         List<Utilizator> rezultate = new ArrayList<>();
         String sql = "SELECT * FROM Utilizator";
 
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 rezultate.add(mapRowToUtilizator(rs));
             }
@@ -143,7 +145,6 @@ public class UtilizatorRepository implements Repository<Utilizator, Integer> {
         double salariu = rs.getDouble("salariu");
 
         Utilizator u;
-
         if ("CURSANT".equals(tip)) {
             u = new Cursant(nume, email, parola, rs.getDouble("portofel_virtual"));
         }
@@ -153,7 +154,7 @@ public class UtilizatorRepository implements Repository<Utilizator, Integer> {
         }
 
         else {
-            u = new Instructor(nume, email, parola, salariu, "Admin-Default");
+            u = new Admin(nume, email, parola, salariu, rs.getInt("nivel_acces"));
         }
 
         u.setId(idBaza);

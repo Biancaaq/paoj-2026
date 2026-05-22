@@ -8,6 +8,10 @@ public abstract class Staff extends Utilizator {
         this.salariu = salariu;
     }
 
+    public double getSalariu() {
+        return salariu;
+    }
+
     @Override
     public String toString() {
         return super.toString() + ", salariu = " + salariu;

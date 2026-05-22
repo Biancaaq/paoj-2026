@@ -33,9 +33,7 @@ public class Inrolare {
     public void setProgres(double progress) {
         this.progres = progress;
     }
-    public void setIdInrolare(int idInrolare) {
-        this.idInrolare = idInrolare;
-    }
+    public void setIdInrolare(int idInrolare) { this.idInrolare = idInrolare; }
     public LocalDate getDataInrolarii() {
         return dataInrolarii;
     }

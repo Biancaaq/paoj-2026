@@ -1,6 +1,8 @@
 package com.pao.project.platforma_elearning.src.util;
 
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -13,29 +15,34 @@ public class DatabaseConnection {
 
     private DatabaseConnection() {
         Properties properties = new Properties();
-        try (java.io.FileInputStream input = new java.io.FileInputStream("src/com/pao/project/platforma_elearning/resources/db.properties")) {
+
+        String caleProperties = "com/pao/project/platforma_elearning/resources/db.properties";
+        InputStream input = DatabaseConnection.class.getClassLoader().getResourceAsStream(caleProperties);
+
+        try {
             if (input == null) {
-                System.out.println("Eroare: Nu s-a gasit fisierul db.properties in resurse!");
-                return;
+                System.out.println("Eroare: Nu s-a gasit fisierul la calea: " + caleProperties);
+                this.connection = DriverManager.getConnection("jdbc:sqlite:platforma_elearning.db");
             }
 
-            properties.load(input);
-            String url = properties.getProperty("db.url");
-
-            this.connection = DriverManager.getConnection(url);
+            else {
+                properties.load(input);
+                String url = properties.getProperty("db.url");
+                this.connection = DriverManager.getConnection(url);
+                input.close();
+            }
 
             initializeazaBazaDeDate();
-
         }
 
-        catch (IOException | SQLException e) {
+        catch (Exception e) {
             System.out.println("Eroare la initializarea bazei de date: " + e.getMessage());
         }
     }
 
     public static DatabaseConnection getInstance() {
         try {
-            if (instance == null || instance.getConnection().isClosed()) {
+            if (instance == null || instance.getConnection() == null || instance.getConnection().isClosed()) {
                 instance = new DatabaseConnection();
             }
         }
@@ -52,21 +59,40 @@ public class DatabaseConnection {
     }
 
     private void initializeazaBazaDeDate() {
-        try (java.io.FileInputStream input = new java.io.FileInputStream("src/com/pao/project/platforma_elearning/resources/schema.sql")) {
-            if (input == null) {
-                System.out.println("Eroare la gasirea fisierul schema.sql");
-                return;
+        String caleSchema = "com/pao/project/platforma_elearning/resources/schema.sql";
+        InputStream input = DatabaseConnection.class.getClassLoader().getResourceAsStream(caleSchema);
+
+        if (input == null) {
+            System.out.println("Eroare: Nu s-a gasit schema.sql la calea: " + caleSchema);
+            return;
+        }
+
+        try {
+            StringBuilder sb = new StringBuilder();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+                String linie;
+
+                while ((linie = reader.readLine()) != null) {
+                    sb.append(linie).append("\n");
+                }
             }
 
-            String scriptSql = new String(input.readAllBytes());
+            String[] comenzi = sb.toString().split(";");
 
             try (Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate(scriptSql);
+                for (String comanda : comenzi) {
+                    String comandaCurata = comanda.trim();
+                    if (!comandaCurata.isEmpty()) {
+                        stmt.executeUpdate(comandaCurata);
+                    }
+                }
+
                 System.out.println("Tabelele au fost create/resetate cu succes in SQLite!");
             }
         }
 
-        catch (IOException | SQLException e) {
+        catch (Exception e) {
             System.out.println("Eroare la executarea scriptului SQL: " + e.getMessage());
         }
     }

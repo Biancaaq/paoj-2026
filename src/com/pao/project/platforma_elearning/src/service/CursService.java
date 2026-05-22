@@ -2,6 +2,7 @@ package com.pao.project.platforma_elearning.src.service;
 
 import com.pao.project.platforma_elearning.src.exception.EntitateExistentaException;
 import com.pao.project.platforma_elearning.src.model.Curs;
+import com.pao.project.platforma_elearning.src.repository.CursRepository;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +10,7 @@ import java.util.List;
 
 public class CursService {
     private static CursService instance;
-    private List<Curs> cursuri = new ArrayList<>();
+    private final CursRepository cursRepository = new CursRepository();
 
     private CursService() {}
 
@@ -26,25 +27,23 @@ public class CursService {
             throw new EntitateExistentaException("Exista deja un curs cu acest titlu in platforma");
         }
 
-        cursuri.add(c);
+        cursRepository.save(c);
     }
 
     public void afiseazaCursuriDupaPret() {
+        List<Curs> cursuri = cursRepository.findAll();
+
         if (cursuri.isEmpty()) {
             System.out.println("Nu exista cursuri in platforma momentan");
-
             return;
         }
 
-        List<Curs> cursuriSortate = new ArrayList<>(this.cursuri);
-        Collections.sort(cursuriSortate);
-
-        for (Curs c : cursuriSortate) {
-            System.out.println(c);
-        }
+        Collections.sort(cursuri);
+        cursuri.forEach(System.out::println);
     }
 
     public void afiseazaCursuriDupaCategorie(String categorie) {
+        List<Curs> cursuri = cursRepository.findAll();
         boolean gasit = false;
 
         for (Curs c : cursuri) {
@@ -60,36 +59,23 @@ public class CursService {
     }
 
     public void afiseazaCursuriInstructor(int idInstructor) {
-        System.out.println("\nCursurile mele:");
-        boolean gasit = false;
-
-        for (Curs c : cursuri) {
-            if (c.getIdInstructor() == idInstructor) {
-                System.out.println(c);
-                gasit = true;
-            }
-        }
-
-        if (!gasit) {
-            System.out.println("Nu ai creat niciun curs inca");
-        }
+        cursRepository.afiseazaCursuriCuInstructori();
     }
 
     public Curs cautaCursDupaTitlu(String titlu) {
-        return cursuri.stream().filter(c -> c.getTitlu().equalsIgnoreCase(titlu)).findFirst().orElse(null);
+        return cursRepository.findAll().stream().filter(c -> c.getTitlu().equalsIgnoreCase(titlu)).findFirst().orElse(null);
     }
 
     public Curs cautaCursDupaId(int id) {
-        return cursuri.stream().filter(c -> c.getId() == id).findFirst().orElse(null);
+        return cursRepository.findById(id).orElse(null);
     }
 
     public Curs stergeCurs(String titlu) {
         Curs c = cautaCursDupaTitlu(titlu);
 
         if (c != null) {
-            cursuri.remove(c);
-            System.out.println("Cursul a fost eliminat din lista platformei");
-
+            cursRepository.delete(c.getId());
+            System.out.println("Cursul a fost eliminat din baza de date");
             return c;
         }
 

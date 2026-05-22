@@ -1,5 +1,6 @@
 package com.pao.project.platforma_elearning.src.service;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,11 +13,15 @@ public class AuditService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private AuditService() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(FISIER_AUDIT, true))) {
-        }
+        File f = new File(FISIER_AUDIT);
+        if (!f.exists()) {
+            try (PrintWriter pw = new PrintWriter(new FileWriter(FISIER_AUDIT, true))) {
+                pw.println("nume_actiune,timestamp");
+            }
 
-        catch (IOException e) {
-            System.out.println("Eroare la initializarea fisierului de audit: " + e.getMessage());
+            catch (IOException e) {
+                System.out.println("Eroare la initializarea fisierului de audit: " + e.getMessage());
+            }
         }
     }
 
