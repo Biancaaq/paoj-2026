@@ -61,6 +61,8 @@ public class EvaluareService {
 
             connection.commit();
 
+            AuditService.getInstance().logActiune("achizitie_curs_id_" + curs.getId());
+
             cursant.setPortofelVirtual(noulSold);
             Inrolare nouaInrolare = new Inrolare(cursant.getId(), curs.getId());
             inrolari.add(nouaInrolare);

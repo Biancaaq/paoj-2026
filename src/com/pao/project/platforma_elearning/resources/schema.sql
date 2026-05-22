@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS Certificat;
 DROP TABLE IF EXISTS Inrolare;
 DROP TABLE IF EXISTS Curs;
 DROP TABLE IF EXISTS Utilizator;
@@ -33,10 +34,10 @@ CREATE TABLE Inrolare (
                           FOREIGN KEY (id_curs) REFERENCES Curs(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Certificat (
-                                          id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                          cod_unic TEXT NOT NULL,
-                                          id_cursant INTEGER NOT NULL,
-                                          titlu_curs TEXT NOT NULL,
-                                          data_emiterii TEXT NOT NULL
+CREATE TABLE Certificat (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            cod_unic TEXT NOT NULL,
+                            nume_cursant TEXT NOT NULL,
+                            titlu_curs TEXT NOT NULL,
+                            data_emiterii TEXT NOT NULL
 );
