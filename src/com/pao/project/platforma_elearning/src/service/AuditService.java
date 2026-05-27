@@ -14,6 +14,7 @@ public class AuditService {
 
     private AuditService() {
         File f = new File(FISIER_AUDIT);
+
         if (!f.exists()) {
             try (PrintWriter pw = new PrintWriter(new FileWriter(FISIER_AUDIT, true))) {
                 pw.println("nume_actiune,timestamp");

@@ -228,7 +228,6 @@ public class MeniuService {
                     }
                     case 5 -> {
                         AuditService.getInstance().logActiune("vizualizare_progres");
-                        evaluareService.afiseazaInrolariUtilizator(utilizatorLogat.getId());
                         com.pao.project.platforma_elearning.src.repository.InrolareRepository inrRepo = new com.pao.project.platforma_elearning.src.repository.InrolareRepository();
                         inrRepo.afiseazaSituatieCursuriStudent(utilizatorLogat.getId());
                     }
@@ -312,13 +311,12 @@ public class MeniuService {
 
     private void executaModificarePret() {
         System.out.print("Titlu curs: ");
-        Curs c = cursService.cautaCursDupaTitlu(scanner.nextLine());
+        String titlu = scanner.nextLine();
 
-        if (c != null && c.getIdInstructor() == utilizatorLogat.getId()) {
-            System.out.print("Pret nou: ");
-            c.setPret(Double.parseDouble(scanner.nextLine()));
-            System.out.println("Pret actualizat");
-        }
+        System.out.print("Pret nou: ");
+        double pretNou = Double.parseDouble(scanner.nextLine());
+
+        cursService.modificaPretCurs(titlu, pretNou);
     }
 
     private void executaVizualizareRecenziiInstructor() {
@@ -362,6 +360,12 @@ public class MeniuService {
         Curs c = cursService.cautaCursDupaTitlu(scanner.nextLine());
 
         if (c != null && utilizatorLogat instanceof Cursant) {
+            try {
+                utilizatorLogat = utilizatorService.login(utilizatorLogat.getEmail(), utilizatorLogat.getParola());
+            }
+
+            catch (Exception ignored) {}
+
             Cursant cursant = (Cursant) utilizatorLogat;
 
             if (evaluareService.esteDejaInrolat(cursant.getId(), c.getId())) {
@@ -373,13 +377,14 @@ public class MeniuService {
                 boolean succes = evaluareService.achizitioneazaCursTranzactional(cursant, c);
 
                 if (!succes) {
-                    System.out.println("Inrolarea a esuat din cauza unei erori de sistem");
+                    System.out.println("Inrolarea a esuat dintr-o eroare de sistem");
                 }
             }
 
             catch (FonduriInsuficienteException e) {
                 System.out.println("Eroare la inrolare: " + e.getMessage());
             }
+
         }
 
         else {
@@ -394,100 +399,121 @@ public class MeniuService {
 
         if (inr != null && inr.getIdCursant() == utilizatorLogat.getId()) {
             Curs curs = cursService.cautaCursDupaId(inr.getIdCurs());
-            System.out.println("\nSesiune de studiu: " + curs.getTitlu());
+            boolean inSesiune = true;
 
-            System.out.println("Lectii disponibile in curs:");
-            if (curs.getLectii().isEmpty()) {
-                System.out.println("Nicio lectie disponibila inca");
-            }
+            while (inSesiune) {
+                System.out.println("\nSesiune de studiu: " + curs.getTitlu());
 
-            else {
-                curs.getLectii().forEach(l -> System.out.println("  - " + l.getTitlu() + " (" + l.getDurataMinute() + " min)"));
-            }
+                System.out.println("Lectii disponibile in curs:");
 
-            System.out.println("\nQuiz-uri disponibile in curs:");
-            if (curs.getQuizuri().isEmpty()) {
-                System.out.println("Niciun quiz disponibil inca");
-            }
-
-            else {
-                curs.getQuizuri().forEach(q -> System.out.println("  - ID: " + q.getId() + " | Titlu: " + q.getTitlu()));
-            }
-
-            System.out.println("\nAlegeri disponibile:");
-            System.out.println("1. Parcurge o lectie");
-            System.out.println("2. Sustine un quiz");
-            System.out.println("3. Genereaza certificat (necesita 100% progres)");
-            System.out.println("4. Lasa o recenzie cursului");
-            System.out.print("Alege o actiune: ");
-
-            int opt = citesteIntreg();
-            switch (opt) {
-                case 1 -> {
-                    if (inr.getProgres() >= 100.0) {
-                        System.out.println("Ai parcurs deja toate lectiile. Esti la zi cu acest curs (progres 100%)");
-                    }
-
-                    else if (curs.getLectii().isEmpty()) {
-                        System.out.println("Nu ai ce lectii sa parcurgi momentan. Instructorul nu a adaugat continut");
-                    }
-
-                    else {
-                        evaluareService.inregistreazaParcurgereLectie(inr, curs.getLectii().size());
-                        System.out.println("Ai parcurs o lectie. Progresul tau a crescut la " + String.format("%.1f", inr.getProgres()) + "%");
-                    }
+                if (curs.getLectii().isEmpty()) {
+                    System.out.println("Nicio lectie disponibila inca");
                 }
-                case 2 -> {
-                    if (curs.getQuizuri().isEmpty()) {
-                        System.out.println("Nu exista quiz-uri pentru acest curs");
-                        break;
-                    }
 
-                    System.out.print("Introdu ID-ul quiz-ului din lista de mai sus: ");
-                    int idQ = citesteIntreg();
-
-                    if (evaluareService.areQuizPromovat(utilizatorLogat.getId(), idQ)) {
-                        System.out.println("Ai promovat deja acest quiz. Nu mai este necesar sa il sustii");
-                        break;
-                    }
-
-                    double notaRandom = 1.0 + (Math.random() * 9.0);
-                    System.out.println("Nota ta primita este: " + String.format("%.2f", notaRandom));
-
-                    evaluareService.salveazaScorQuiz(utilizatorLogat.getId(), idQ, notaRandom);
-
-                    if (notaRandom >= 5.0) {
-                        System.out.println("Ai promovat testul cu succes!");
-                    }
-
-                    else {
-                        System.out.println("Ai picat testul. Va trebui sa mai inveti");
-                    }
+                else {
+                    curs.getLectii().forEach(l -> System.out.println("  - " + l.getTitlu() + " (" + l.getDurataMinute() + " min)"));
                 }
-                case 3 -> {
-                    if (inr.getProgres() >= 99.0) {
-                        evaluareService.genereazaCertificat(utilizatorLogat.getNume(), curs.getTitlu(), inr.getProgres());
-                    }
 
-                    else {
-                        System.out.println("Eroare: Cursul nu este finalizat. Progres actual: " + String.format("%.1f", inr.getProgres()) + "%");
-                    }
-                }
-                case 4 -> {
-                    if (inr.getProgres() >= 99.0) {
-                        System.out.print("Nota acordata (1-5): ");
-                        int rating = citesteIntreg();
-                        System.out.print("Comentariu: ");
-                        String com = scanner.nextLine();
-                        curs.adaugaRecenzie(new Recenzie(utilizatorLogat.getId(), rating, com));
-                        System.out.println("Recenzie salvata in sistem si vizibila pentru instructor");
-                    }
+                System.out.println("\nQuiz-uri disponibile in curs:");
 
-                    else {
-                        System.out.println("Trebuie sa termini cursul inainte de a lasa o recenzie.");
-                    }
+                if (curs.getQuizuri().isEmpty()) {
+                    System.out.println("Niciun quiz disponibil inca");
                 }
-                default -> System.out.println("Optiune invalida.");
+
+                else {
+                    curs.getQuizuri().forEach(q -> System.out.println("  - ID: " + q.getId() + " | Titlu: " + q.getTitlu()));
+                }
+
+                System.out.println("\nAlegeri disponibile:");
+                System.out.println("1. Parcurge o lectie");
+                System.out.println("2. Sustine un quiz");
+                System.out.println("3. Genereaza certificat (necesita 100% progres)");
+                System.out.println("4. Lasa o recenzie cursului");
+                System.out.println("0. Inapoi la meniul principal");
+                System.out.print("Alege o actiune: ");
+
+                int opt = citesteIntreg();
+                switch (opt) {
+                    case 1 -> {
+                        if (inr.getProgres() >= 100.0) {
+                            System.out.println("Ai parcurs deja toate lectiile. Esti la zi cu acest curs (progres 100%)");
+                        }
+
+                        else if (curs.getLectii().isEmpty()) {
+                            System.out.println("Nu ai ce lectii sa parcurgi momentan. Instructorul nu a adaugat continut");
+                        }
+
+                        else {
+                            evaluareService.inregistreazaParcurgereLectie(inr, curs.getLectii().size());
+                            System.out.println("Ai parcurs o lectie. Progresul tau a crescut la " + String.format("%.1f", inr.getProgres()) + "%");
+                        }
+                    }
+                    case 2 -> {
+                        if (curs.getQuizuri().isEmpty()) {
+                            System.out.println("Nu exista quiz-uri pentru acest curs");
+                            break;
+                        }
+
+                        System.out.print("Introdu ID-ul quiz-ului din lista de mai sus: ");
+                        int idQ = citesteIntreg();
+
+                        if (evaluareService.areQuizPromovat(utilizatorLogat.getId(), idQ)) {
+                            System.out.println("Ai promovat deja acest quiz. Nu mai este necesar sa il sustii");
+                            break;
+                        }
+
+                        double notaRandom = 1.0 + (Math.random() * 9.0);
+                        System.out.println("Nota ta primita este: " + String.format("%.2f", notaRandom));
+
+                        evaluareService.salveazaScorQuiz(utilizatorLogat.getId(), idQ, notaRandom);
+
+                        if (notaRandom >= 5.0) {
+                            System.out.println("Ai promovat testul cu succes!");
+                        }
+
+                        else {
+                            System.out.println("Ai picat testul. Va trebui sa mai inveti");
+                        }
+                    }
+                    case 3 -> {
+                        if (inr.getProgres() >= 99.0) {
+                            evaluareService.genereazaCertificat(utilizatorLogat.getNume(), curs.getTitlu(), inr.getProgres());
+                        }
+
+                        else {
+                            System.out.println("Eroare: Cursul nu este finalizat. Progres actual: " + String.format("%.1f", inr.getProgres()) + "%");
+                        }
+                    }
+                    case 4 -> {
+                        if (inr.getProgres() >= 99.0) {
+                            int rating;
+
+                            while (true) {
+                                System.out.print("Nota acordata (1-5): ");
+                                rating = citesteIntreg();
+
+                                if (rating >= 1 && rating <= 5) {
+                                    break;
+                                }
+
+                                System.out.println("Nota trebuie sa fie intre 1 si 5.");
+                            }
+
+                            System.out.print("Comentariu: ");
+                            String com = scanner.nextLine();
+                            curs.adaugaRecenzie(new Recenzie(utilizatorLogat.getId(), rating, com));
+                            System.out.println("Recenzie salvata in sistem si vizibila pentru instructor");
+                        }
+
+                        else {
+                            System.out.println("Trebuie sa termini cursul inainte de a lasa o recenzie.");
+                        }
+                    }
+                    case 0 -> {
+                        inSesiune = false;
+                    }
+                    default -> System.out.println("Optiune invalida.");
+                }
             }
         }
 

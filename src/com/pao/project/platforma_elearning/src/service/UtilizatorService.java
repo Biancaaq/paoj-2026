@@ -57,11 +57,13 @@ public class UtilizatorService {
     }
 
     public void alimenteazaPortofel(String email, double suma) throws UtilizatorNegasitException {
-        Optional<Utilizator> opt = utilizatorRepository.findAll().stream().filter(user -> user.getEmail().equalsIgnoreCase(email)).findFirst();
+        List<Utilizator> toti = utilizatorRepository.findAll();
+        Utilizator u = toti.stream().filter(user -> user.getEmail().equalsIgnoreCase(email)).findFirst().orElse(null);
 
-        if (opt.isPresent() && opt.get() instanceof Cursant) {
-            Cursant c = (Cursant) opt.get();
+        if (u instanceof Cursant) {
+            Cursant c = (Cursant) u;
             c.setPortofelVirtual(c.getPortofelVirtual() + suma);
+
             utilizatorRepository.update(c);
             System.out.println("Portofel actualizat in DB. Sold nou: " + c.getPortofelVirtual());
         }
